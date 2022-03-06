@@ -1,4 +1,4 @@
-module Staticpedia.HTML.Class
+module Staticpedia.Class
   ( CreationError (..)
   , CreationErrorKind (..)
   , Class
@@ -10,8 +10,8 @@ module Staticpedia.HTML.Class
 import qualified Data.Char as Char
 import Data.Text (Text)
 import qualified Data.Text as Text
-import TextShow (TextShow, showb, showt)
 import qualified Data.Text.Lazy.Builder as B
+import TextShow (TextShow, showb, showt)
 
 newtype Class = Class { text :: Text }
   deriving (Eq, Ord, Show)
@@ -26,7 +26,7 @@ data CreationError = CreationError
 
 instance TextShow CreationError where
   showb e = (B.fromText . Text.concat)
-    [ "Invalid word "
+    [ "Invalid class "
     , creationErrorText e
     , " because "
     , (showt . creationErrorKind) e

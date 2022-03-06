@@ -1,37 +1,35 @@
 module Staticpedia.Component.Inline
-  ( Component (..)
+  ( InlineComponent (..)
   )
   where
 
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Staticpedia.HTML.Class (Class)
+import Staticpedia.Class (Class)
 import TextShow (showt)
+import Staticpedia.TextNode (TextNode)
+import qualified Staticpedia.TextNode as TextNode
+import Staticpedia.Component (Component, render)
 
-data Component
-  = Text Text
-  | Bold Component
-  | Italic Component
-  | Preformatted Component
-  | Sequence [Component]
-  | Custom Class Component
+data InlineComponent
+  = Text TextNode
+  | Bold InlineComponent
+  | Italic InlineComponent
+  | Preformatted InlineComponent
+  | Sequence [InlineComponent]
+  | Custom Class InlineComponent
 
-render :: Component -> Text
-render (Text t) = 
-  let escape '&' = "&amp;"
-      escape '<' = "&lt;"
-      escape '>' = "&gt;"
-      escape '"' = "&quot;"
-      escape '\'' = "&#39;"
-      escape '\\' = "&#92;"
-      escape ch = Text.singleton ch
-  in Text.concatMap escape t
-render (Bold c) = Text.concat
-  ["<span class=\"staticpedia-bold\">", render c, "</span>"]
-render (Italic c) = Text.concat
-  ["<span class=\"staticpedia-italic\">", render c, "</span>"]
-render (Preformatted c) = Text.concat
-  ["<span class=\"staticpedia-preformatted\"><pre>", render c, "</pre></span>"]
-render (Sequence cs) = Text.concat (map render cs)
-render (Custom cls c) = Text.concat
-  ["<span class=\"", showt cls, "\">", render c, "</span>"]
+instance Component InlineComponent where
+  render ctx (Text t) = render ctx t
+  render ctx (Bold c) = Text.concat
+    ["<span class=\"staticpedia-bold\">", render ctx c, "</span>"]
+  render ctx (Italic c) = Text.concat
+    ["<span class=\"staticpedia-italic\">", render ctx c, "</span>"]
+  render ctx (Preformatted c) = Text.concat
+    [ "<span class=\"staticpedia-preformatted\"><pre>"
+    , render ctx c
+    , "</pre></span>"
+    ]
+  render ctx (Sequence cs) = Text.concat (map (render ctx) cs)
+  render ctx (Custom cls c) = Text.concat
+    ["<span class=\"", showt cls, "\">", render ctx c, "</span>"]
