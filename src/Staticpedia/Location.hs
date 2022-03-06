@@ -13,6 +13,7 @@ module Staticpedia.Location
   ) where
 
 import qualified Data.Char as Char
+import Staticpedia.Error (mapErr)
 import Staticpedia.TextNode (TextNode)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -59,7 +60,69 @@ idFromText t = case Text.uncons t of
 
 newtype Fragment = Fragment { fragmentText :: Text } deriving (Eq, Ord)
 
+data FragmentError = FragmentError
+  { fragmentErrorText :: Text
+  , fragmentErrorKind :: FragmentErrorKind
+  } deriving (Eq, Ord)
+
+instance TextShow FragmentError where
+  showb e = (B.fromText . Text.concat)
+    [ "Invalid fragment "
+    , fragmentErrorText e
+    , " because "
+    , (showt . fragmentErrorKind) e
+    ]
+
+data FragmentErrorKind
+  = EmptyFragment
+  | InvalidSingleDot
+  | InvalidDoubleDot
+  | InvalidFragmentChar Char
+  deriving (Eq, Ord)
+
+instance TextShow FragmentErrorKind where
+  showb EmptyFragment = B.fromText "empty fragment"
+  showb InvalidSingleDot = B.fromText "'.' not allowed as whole fragment"
+  showb InvalidDoubleDot = B.fromText "'..' not allowed as whole fragment"
+  showb (InvalidFragmentChar ch) = (B.fromText . Text.concat)
+    ["character ", Text.singleton ch, " is not valid part of an ID"]
+
+fragmentFromText :: Text -> Either FragmentError Fragment
+fragmentFromText "" = Left (FragmentError "" EmptyFragment)
+fragmentFromText "." = Left (FragmentError "." InvalidSingleDot)
+fragmentFromText ".." = Left (FragmentError ".." InvalidDoubleDot)
+fragmentFromText t = case Text.find (== '/') t of
+  Just ch -> Left (FragmentError t (InvalidFragmentChar ch))
+  Nothing -> Right (Fragment t)
+
 newtype Path = Path { pathFragments :: [Fragment] } deriving (Eq, Ord)
+
+data PathError = PathError
+  { pathErrorText :: Text
+  , pathErrorCause :: FragmentError
+  } deriving (Eq, Ord)
+
+instance TextShow PathError where
+  showb e = (B.fromText . Text.concat)
+    [ "Invalid path "
+    , pathErrorText e
+    , ": "
+    , (showt . pathErrorCause) e
+    ]
+
+pathFromText :: Text -> Either PathError Path
+pathFromText t =
+  let results =
+        ( map fragmentFromText
+        . filter (not . Text.null)
+        . Text.split (== '/')
+        ) t
+      makeFragments [] = Right []
+      makeFragments (Left e : _) = Left (PathError t e)
+      makeFragments (Right x : xs) = do
+        xs' <- makeFragments xs
+        return (x : xs')
+  in (fmap Path . makeFragments) results
 
 data Internal
   = PathOnly Path
@@ -76,6 +139,46 @@ internalId:: Internal -> Maybe Id
 internalId (PathOnly _) = Nothing
 internalId (IdOnly i) = Just i
 internalId (PathWithId _ i) = Just i
+
+data InternalLocError = InternalLocError
+  { internalLocErrorText :: Text
+  , internalLocErrorCause :: InternalLocErrorCause
+  } deriving (Eq, Ord)
+
+instance TextShow InternalLocError where
+  showb e = (B.fromText . Text.concat)
+    [ "Invalid internalLoc "
+    , internalLocErrorText e
+    , " because "
+    , (showt . internalLocErrorCause) e
+    ]
+
+data InternalLocErrorCause
+  = InternalLocErrorPath PathError
+  | InternalLocErrorId IdError
+  deriving (Eq, Ord)
+
+instance TextShow InternalLocErrorCause where
+  showb (InternalLocErrorPath e) = showb e
+  showb (InternalLocErrorId e) = showb e
+
+internalFromText :: Text -> Either InternalLocError Internal
+internalFromText t =
+  let (pathT, idT) = case Text.findIndex (== '/') t of
+        Just i -> (Text.take i t, Text.drop (i + 1) t)
+        Nothing -> (t, "")
+      pathResult = mapErr (InternalLocError t . InternalLocErrorPath)
+        (pathFromText pathT)
+      idResult =  mapErr (InternalLocError t . InternalLocErrorId)
+        (idFromText idT)
+  in if Text.null idT
+      then fmap PathOnly pathResult
+      else if Text.null pathT
+        then fmap IdOnly idResult
+        else case (pathResult, idResult) of
+          (Right p, Right id) -> Right (PathWithId p id)
+          (Left e , _) -> Left e
+          (_, Left e) -> Left e
 
 data Location
   = Internal Internal
