@@ -14,15 +14,19 @@ import Staticpedia.Location (Location)
 
 data InlineComponent
   = Text TextNode
+  | Sequence [InlineComponent]
   | Bold InlineComponent
   | Italic InlineComponent
   | Preformatted InlineComponent
   | Link Location InlineComponent
-  | Sequence [InlineComponent]
-  | Custom Class InlineComponent
+  | Audio Location
+  | CustomClass [Class] InlineComponent
+  | CustomElement Text InlineComponent Text
+  | RawHtml Text
 
 instance Component InlineComponent where
   render ctx (Text t) = render ctx t
+  render ctx (Sequence cs) = Text.concat (map (render ctx) cs)
   render ctx (Bold c) = Text.concat
     ["<span class=\"staticpedia-bold\">", render ctx c, "</span>"]
   render ctx (Italic c) = Text.concat
@@ -39,6 +43,18 @@ instance Component InlineComponent where
     , render ctx c
     , "<a>"
     ]
-  render ctx (Sequence cs) = Text.concat (map (render ctx) cs)
-  render ctx (Custom cls c) = Text.concat
-    ["<span class=\"", showt cls, "\">", render ctx c, "</span>"]
+  render ctx (Audio l) = Text.concat
+    [ "<audio controls src=\""
+    , render ctx l
+    , "\">Your browser does not support audio</audio>"
+    ]
+  render ctx (CustomClass clss c) = Text.concat
+    [ "<span class=\""
+    ,  (Text.intercalate " " . fmap showt) clss
+    , "\">"
+    , render ctx c
+    , "</span>"
+    ]
+  render ctx (CustomElement start c end) = Text.concat
+    [ start, render ctx c, end ]
+  render _ (RawHtml t) = t
