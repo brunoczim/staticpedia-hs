@@ -1,8 +1,7 @@
 module Staticpedia.Component 
   ( Context
-  , ctxPath
   , ctxLevel
-  , createCtx
+  , initialCtx
   , enterCtxLevel
   , Component(..)
   ) where
@@ -15,13 +14,12 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Staticpedia.Location as TextNode
 
-data Context = Context
-  { ctxPath :: Location.Path
-  , ctxLevel :: Int
+newtype Context = Context
+  { ctxLevel :: Int
   } deriving (Eq, Ord)
 
-createCtx :: Location.Path -> Context
-createCtx p = Context { ctxPath = p, ctxLevel = 0 }
+initialCtx:: Context
+initialCtx= Context { ctxLevel = 0 }
 
 enterCtxLevel :: Context -> Context
 enterCtxLevel ctx = ctx { ctxLevel = ctxLevel ctx + 1 }
@@ -45,8 +43,7 @@ instance Component Location.Internal where
   render ctx (Location.PathOnly p) = render ctx p
   render ctx (Location.PathWithId p i) =
     Text.concat [render ctx p, "#", render ctx i]
-  render ctx (Location.IdOnly i) =
-    Text.concat [render ctx (ctxPath ctx), "#", render ctx i]
+  render ctx (Location.IdOnly i) = Text.concat ["#", render ctx i]
 
 instance Component Location where
   render ctx (Location.Internal l) = render ctx l
