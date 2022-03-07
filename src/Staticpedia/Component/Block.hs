@@ -1,5 +1,7 @@
 module Staticpedia.Component.Block
   ( BlockComponent (..)
+  , TableEntry (..)
+  , tableEntry
   ) where
 
 import Staticpedia.Component (Component, Context, render)
