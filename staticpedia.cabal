@@ -28,6 +28,7 @@ library
       Lib
       Staticpedia.Class
       Staticpedia.Component
+      Staticpedia.Component.Block
       Staticpedia.Component.Inline
       Staticpedia.Error
       Staticpedia.Location

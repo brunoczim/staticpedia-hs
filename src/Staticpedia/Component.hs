@@ -26,7 +26,7 @@ instance Component Location.Id where
   render _ = Location.idText
 
 instance Component Location.Fragment where
-  render _ = Location.fragmentText
+  render _ = TextNode.toHtml . TextNode.fromText . Location.fragmentText
 
 instance Component Location.Path where
   render ctx = Text.intercalate "/" . map (render ctx) . Location.pathFragments

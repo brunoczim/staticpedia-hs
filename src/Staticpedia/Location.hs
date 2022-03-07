@@ -91,7 +91,7 @@ fragmentFromText :: Text -> Either FragmentError Fragment
 fragmentFromText "" = Left (FragmentError "" EmptyFragment)
 fragmentFromText "." = Left (FragmentError "." InvalidSingleDot)
 fragmentFromText ".." = Left (FragmentError ".." InvalidDoubleDot)
-fragmentFromText t = case Text.find (== '/') t of
+fragmentFromText t = case Text.find (`elem` ['#', '/']) t of
   Just ch -> Left (FragmentError t (InvalidFragmentChar ch))
   Nothing -> Right (Fragment t)
 

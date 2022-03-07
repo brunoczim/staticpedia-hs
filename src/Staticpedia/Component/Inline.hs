@@ -23,6 +23,7 @@ data InlineComponent
   | CustomClass [Class] InlineComponent
   | CustomElement Text InlineComponent Text
   | RawHtml Text
+  deriving (Eq, Ord)
 
 instance Component InlineComponent where
   render ctx (Text t) = render ctx t
