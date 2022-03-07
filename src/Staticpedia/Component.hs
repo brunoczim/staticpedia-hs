@@ -1,6 +1,9 @@
 module Staticpedia.Component 
   ( Context
   , ctxPath
+  , ctxLevel
+  , createCtx
+  , enterCtxLevel
   , Component(..)
   ) where
 
@@ -12,9 +15,16 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Staticpedia.Location as TextNode
 
-newtype Context = Context
+data Context = Context
   { ctxPath :: Location.Path
+  , ctxLevel :: Int
   } deriving (Eq, Ord)
+
+createCtx :: Location.Path -> Context
+createCtx p = Context { ctxPath = p, ctxLevel = 0 }
+
+enterCtxLevel :: Context -> Context
+enterCtxLevel ctx = ctx { ctxLevel = ctxLevel ctx + 1 }
 
 class Component c where
   render :: Context -> c -> Text

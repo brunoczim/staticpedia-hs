@@ -30,6 +30,7 @@ library
       Staticpedia.Component
       Staticpedia.Component.Block
       Staticpedia.Component.Inline
+      Staticpedia.Component.Section
       Staticpedia.Error
       Staticpedia.Location
       Staticpedia.TextNode

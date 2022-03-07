@@ -4,7 +4,7 @@ module Staticpedia.Component.Block
   , tableEntry
   ) where
 
-import Staticpedia.Component (Component, Context, render)
+import Staticpedia.Component (Component, render)
 import Staticpedia.Component.Inline (InlineComponent)
 import Staticpedia.Location (Location)
 import Staticpedia.TextNode (TextNode)
