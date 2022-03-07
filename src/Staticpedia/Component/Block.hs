@@ -7,6 +7,7 @@ import Staticpedia.Component.Inline (InlineComponent)
 import Staticpedia.Location (Location)
 import Staticpedia.TextNode (TextNode)
 import Staticpedia.Class (Class)
+import qualified Staticpedia.Error as Error
 import Data.Text (Text)
 import qualified Data.Text as Text
 import TextShow (showt)
@@ -19,10 +20,26 @@ data BlockComponent
   | Figure Location TextNode InlineComponent 
   | OrderedList [BlockComponent]
   | UnorderedList [BlockComponent]
+  | Table InlineComponent [[TableEntry]]
   | CustomClass [Class] BlockComponent
   | CustomElement Text BlockComponent Text
   | RawHtml Text
   deriving (Eq, Ord)
+
+data TableEntry = TableEntry
+  { tableEntryData :: BlockComponent
+  , tableEntryHeader :: Bool
+  , tableEntryRowspan :: Int 
+  , tableEntryColspan :: Int
+  } deriving (Eq, Ord)
+
+tableEntry :: TableEntry
+tableEntry = TableEntry
+  { tableEntryData = Error.raise ("Table entry's data not set" :: Text)
+  , tableEntryHeader = False
+  , tableEntryRowspan = 1
+  , tableEntryColspan = 1
+  }
 
 instance Component BlockComponent where
   render ctx (Inline c) = Text.concat
@@ -45,24 +62,29 @@ instance Component BlockComponent where
     , "</div></div>"
     ]
   render ctx (OrderedList cs) = Text.concat
-    ( "<ol class=\"staticpedia-ordered-list>" :
-    (cs >>= (\c ->
-      [ "<li class=\"staticpedia-ordered-list-item\">"
-      , case c of
-          Inline c' -> render ctx c'
-          _ -> render ctx c
-      , "</li>"])) ++
-    ["</ol>"]
+    ( "<ol class=\"staticpedia-ordered-list>"
+      : (cs >>= (\c ->
+        [ "<li>"
+        , case c of
+            Inline c' -> render ctx c'
+            _ -> render ctx c
+        , "</li>"]))
+      ++ ["</ol>"]
     )
   render ctx (UnorderedList cs) = Text.concat
-    ( "<ul class=\"staticpedia-unordered-list>" :
-    (cs >>= (\c ->
-      [ "<li class=\"staticpedia-unordered-list-item\">"
-      , case c of
-          Inline c' -> render ctx c'
-          _ -> render ctx c
-      , "</li>"])) ++
-    ["</ul>"]
+    ( "<ul class=\"staticpedia-unordered-list>"
+      : (cs >>= (\c ->
+        [ "<li>"
+        , case c of
+            Inline c' -> render ctx c'
+            _ -> render ctx c
+        , "</li>"]))
+      ++ ["</ul>"]
+    )
+  render ctx (Table c rs) = Text.concat
+    ( "<table class=\"staticpedia-table\">"
+      : (rs >>= \r -> "<tr>" : map (render ctx) r ++ ["</tr>" ])
+      ++ ["</table>"]
     )
   render ctx (CustomClass clss c) = Text.concat
     [ "<div class=\""
@@ -74,3 +96,26 @@ instance Component BlockComponent where
   render ctx (CustomElement start c end) = Text.concat
     [ start, render ctx c, end ]
   render _ (RawHtml t) = t
+
+instance Component TableEntry where
+  render ctx entry =
+    let tag = if tableEntryHeader entry then "th" else "td"
+        rowspan = if tableEntryRowspan entry == 1
+          then []
+          else [" rowspan=\"", showt (tableEntryRowspan entry), "\""]
+        colspan = if tableEntryColspan entry == 1
+          then []
+          else [" colspan=\"", showt (tableEntryColspan entry), "\""]
+    in case tableEntryData entry of
+        Inline c -> Text.concat
+          ( ["<", tag]
+            ++ rowspan
+            ++ colspan
+            ++ [">", render ctx c, "</", tag, ">"]
+          )
+        c -> Text.concat 
+          ( ["<", tag]
+            ++ rowspan
+            ++ colspan
+            ++ [">", render ctx c, "</", tag, ">"]
+          )
