@@ -46,11 +46,12 @@ instance Component Page where
           ]
           ++ (concatMap renderStylesheet . stylesheets . head) page
           ++ (concatMap renderScript . scripts . head) page
-          ++  [ "</head><body><div id=\"page-top\"><div id=\"banner\">"
+          ++  [ "</head><body><div id=\"staticpedia-page-top\">"
+              , "<div id=\"staticpedia-banner\">"
               , (render ctx . banner . head) page
-              , "</div><h1>"
+              , "</div><h1 class=\"staticpedia-title\">"
               , render ctx (title page)
-              , "</h1><div id=\"body-wrapper\">"
+              , "</h1><div id=\"staticpedia-body-wrapper\">"
               ]
           ++ map (render (Component.enterCtxLevel ctx)) (sections page)
           ++ ["</div></div></body></html>"]

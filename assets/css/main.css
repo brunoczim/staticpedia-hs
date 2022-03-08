@@ -1,0 +1,179 @@
+* {
+    color: black;
+    margin: 0;
+    padding: 0;
+    font-size: 100%;
+    font: inherit;
+    line-height: 1.25;
+    border: 0;
+    font-family: 'Noto Sans', Cantarell, Arial, sans-serif;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+html, body, #page-wrapper {
+    width: 100%;
+    height: auto;
+}
+
+b.staticpedia-bold, b.staticpedia-bold * {
+    font-weight: bold;
+}
+
+i.staticpedia-italic, i.staticpedia-italic * {
+    font-style: italic;
+}
+
+ul.staticpedia-unordered-list {
+    list-style: disc;
+}
+
+ol.staticpedia-ordered-list {
+    list-style: decimal;
+}
+
+table.staticpedia-table {
+    border-collapse: collapse;
+    border: 0;
+    margin-bottom: 14pt;
+}
+
+table.staticpedia-table td, table.staticpedia-table th {
+    text-align: center;
+    padding: 7pt;
+    border: 1px solid black;
+}
+
+table.staticpedia-table th {
+    font-weight: bold;
+}
+
+.staticpedia-title, .staticpedia-title > a {
+    font-weight: bold;
+}
+
+h1.staticpedia-title {
+    font-size: 200%;
+    padding-top: 20pt;
+    padding-bottom: 10pt;
+}
+
+h2.staticpedia-title {
+    font-size: 175%;
+    padding-top: 16pt;
+    padding-bottom: 8pt;
+}
+
+h3.staticpedia-title {
+    font-size: 140%;
+    padding-top: 14pt;
+    padding-bottom: 7pt;
+}
+
+h4.staticpedia-title {
+    font-size: 122.5%;
+    padding-top: 12pt;
+    padding-bottom: 6pt;
+}
+
+h5.staticpedia-title {
+    font-size: 115.5%;
+    padding-top: 10pt;
+    padding-bottom: 5pt;
+}
+
+h6.staticpedia-title {
+    font-size: 110%;
+    padding-top: 8pt;
+    padding-bottom: 4pt;
+}
+
+a.staticpedia-anchor, a.staticpedia-anchor * {
+    color: #003850;
+}
+
+a.staticpedia-anchor:hover {
+    text-decoration: underline;
+}
+
+a.staticpedia-anchor:visited {
+    color: #00214B;
+}
+
+p.staticpedia-paragraph {
+    text-indent: 14pt;
+    text-align: justify;
+    margin-bottom: 5pt;
+    line-height: 1.25;
+}
+
+p.staticpedia-paragraph:last-child {
+    margin-bottom: 0;
+}
+
+.staticpedia-table-title {
+    font-weight: bold;
+    display: block;
+    margin-top: 6pt;
+    margin-bottom: 3pt;
+}
+
+#static-page-top {
+    margin: 5pt;
+}
+
+#static-body-wrapper {
+    padding: 10pt;
+}
+
+.staticpedia-section-body {
+    padding-left: 10pt;
+    border-left: solid 1pt #000000;
+}
+
+img.staticpedia-image {
+    max-width: 500pt;
+    max-height: 98vh;
+    width: 100%;
+    background-color: white;
+}
+
+.staticpedia-figure {
+    background: #F7F7F7;
+    padding: 5pt;
+    border: 1pt solid #B0B0B0;
+    display: inline-block;
+}
+
+.staticpedia-figure-legend {
+    margin: 2pt;
+}
+
+.staticpedia-list {
+    margin-top: 10pt;
+    margin-bottom: 10pt;
+    margin-left: 20pt;
+    margin-right: 5pt;
+}
+
+.staticpedia-list > li {
+    line-height: 1.5;
+}
+
+ul.static-unmarked-list {
+    list-style: none;
+    margin: 0;
+}
+
+ul.static-unmarked-list > li {
+    white-space: nowrap;
+    line-height: 1.25;
+}
+
+#staticpedia-banner > a {
+    font-size: 120%;
+    font-weight: bold;
+    border: solid black 1px;
+    padding-left: 5pt;
+    padding-right: 5pt;
+}

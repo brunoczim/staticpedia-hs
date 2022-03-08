@@ -29,14 +29,11 @@ instance Component InlineComponent where
   render ctx (Text t) = render ctx t
   render ctx (Sequence cs) = Text.concat (map (render ctx) cs)
   render ctx (Bold c) = Text.concat
-    ["<span class=\"staticpedia-bold\">", render ctx c, "</span>"]
+    ["<b class=\"staticpedia-bold\">", render ctx c, "</b>"]
   render ctx (Italic c) = Text.concat
-    ["<span class=\"staticpedia-italic\">", render ctx c, "</span>"]
+    ["<i class=\"staticpedia-italic\">", render ctx c, "</i>"]
   render ctx (Preformatted c) = Text.concat
-    [ "<span class=\"staticpedia-preformatted\"><pre>"
-    , render ctx c
-    , "</pre></span>"
-    ]
+    ["<pre class=\"staticpedia-pre\">", render ctx c, "</pre>"]
   render ctx (Link l c) = Text.concat
     [ "<a class=\"staticpedia-anchor\" href=\""
     , render ctx l

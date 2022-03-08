@@ -32,7 +32,7 @@ instance Component Section where
           , showt (Component.ctxLevel ctx)
           , "\"><"
           , tag
-          , " class=\"staticpedia-section-title\"><a href=\"#"
+          , " class=\"staticpedia-title\"><a href=\"#"
           , render ctx (id section)
           , "\">"
           , render ctx (title section)

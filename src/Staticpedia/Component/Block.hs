@@ -22,7 +22,9 @@ data BlockComponent
   | Figure Location TextNode InlineComponent 
   | OrderedList [BlockComponent]
   | UnorderedList [BlockComponent]
-  | Table InlineComponent [[TableEntry]]
+  | UnmarkedList [BlockComponent]
+  | Table [[TableEntry]]
+  | TableFigure InlineComponent [[TableEntry]]
   | CustomClass [Class] BlockComponent
   | CustomElement Text BlockComponent Text
   | RawHtml Text
@@ -64,7 +66,7 @@ instance Component BlockComponent where
     , "</div></div>"
     ]
   render ctx (OrderedList cs) = Text.concat
-    ( "<ol class=\"staticpedia-ordered-list>"
+    ( "<ol class=\"staticpedia-list staticpedia-ordered-list>"
       : (cs >>= (\c ->
         [ "<li>"
         , case c of
@@ -74,7 +76,7 @@ instance Component BlockComponent where
       ++ ["</ol>"]
     )
   render ctx (UnorderedList cs) = Text.concat
-    ( "<ul class=\"staticpedia-unordered-list>"
+    ( "<ul class=\"staticpedia-list staticpedia-unordered-list>"
       : (cs >>= (\c ->
         [ "<li>"
         , case c of
@@ -83,11 +85,29 @@ instance Component BlockComponent where
         , "</li>"]))
       ++ ["</ul>"]
     )
-  render ctx (Table c rs) = Text.concat
+  render ctx (UnmarkedList cs) = Text.concat
+    ( "<ul class=\"staticpedia-list staticpedia-marked-list>"
+      : (cs >>= (\c ->
+        [ "<li>"
+        , case c of
+            Inline c' -> render ctx c'
+            _ -> render ctx c
+        , "</li>"]))
+      ++ ["</ul>"]
+    )
+  render ctx (Table rs) = Text.concat
     ( "<table class=\"staticpedia-table\">"
       : (rs >>= \r -> "<tr>" : map (render ctx) r ++ ["</tr>" ])
       ++ ["</table>"]
     )
+  render ctx (TableFigure c rs) = Text.concat
+    [ "<div class=\"staticpedia-table-figure\">"
+    , "<span class=\"staticpedia-table-title\">"
+    , render ctx c
+    , "</span>"
+    , render ctx (Table rs)
+    , "</div>"
+    ]
   render ctx (CustomClass clss c) = Text.concat
     [ "<div class=\""
     ,  (Text.intercalate " " . fmap showt) clss

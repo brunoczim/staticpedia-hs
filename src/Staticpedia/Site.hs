@@ -6,6 +6,7 @@ module Staticpedia.Site
   , insertNode
   , insertPage
   , insertDir
+  , mergeDirs
   , generate
   ) where
 
