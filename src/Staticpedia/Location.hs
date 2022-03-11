@@ -14,6 +14,9 @@ module Staticpedia.Location
   , idFromText
   , pathFromText
   , internalFromText
+  , appendToPath
+  , rootPath
+  , branchPath
   ) where
 
 import qualified Data.Char as Char
@@ -23,8 +26,12 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Lazy.Builder as B
 import TextShow (TextShow, showb, showt)
+import qualified Staticpedia.TextNode as TextNode
 
 newtype Id = Id { idText :: Text } deriving (Eq, Ord)
+
+instance TextShow Id where
+  showb = B.fromText . idText
 
 data IdError = IdError
   { idErrorText :: Text
@@ -64,6 +71,9 @@ idFromText t = case Text.uncons t of
 
 newtype Fragment = Fragment { fragmentText :: Text } deriving (Eq, Ord)
 
+instance TextShow Fragment where
+  showb = B.fromText . fragmentText
+
 data FragmentError = FragmentError
   { fragmentErrorText :: Text
   , fragmentErrorKind :: FragmentErrorKind
@@ -101,6 +111,23 @@ fragmentFromText t = case Text.find (`elem` ['#', '/']) t of
 
 newtype Path = Path { pathFragments :: [Fragment] } deriving (Eq, Ord)
 
+rootPath :: Path
+rootPath = Path []
+
+appendToPath :: Fragment -> Path -> Path
+appendToPath frag = Path . (++ [frag]) . pathFragments
+
+branchPath :: Path -> Path -> (Path, Path, Path)
+branchPath (Path (x : xs)) (Path (y : ys))
+  | x == y =
+      let (Path common, px, py) = branchPath (Path xs) (Path ys)
+      in (Path (x : common), px, py)
+  | x /= y = (Path [], Path (x : xs), Path (y : ys))
+branchPath px py = (Path [], px, py)
+
+instance TextShow Path where
+  showb = B.fromText . Text.intercalate "/" . map showt . pathFragments
+
 data PathError = PathError
   { pathErrorText :: Text
   , pathErrorCause :: FragmentError
@@ -133,6 +160,13 @@ data Internal
   | IdOnly Id
   | PathWithId Path Id
   deriving (Eq, Ord)
+
+instance TextShow Internal where
+  showb (PathOnly p) = showb p
+  showb (PathWithId p i) = B.fromText
+    ( Text.concat [showt p, "#", showt i]
+    )
+  showb (IdOnly i) = B.fromText (Text.concat ["#", showt i])
 
 internalPath :: Internal -> Maybe Path
 internalPath (PathOnly p) = Just p
@@ -193,3 +227,7 @@ fromPath = Internal . PathOnly
 
 fromId :: Id -> Location
 fromId = Internal . IdOnly
+
+instance TextShow Location where
+  showb (Internal l) = showb l
+  showb (External l) = (showb . TextNode.toHtml) l

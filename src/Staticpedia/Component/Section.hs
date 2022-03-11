@@ -41,7 +41,7 @@ instance Component Section where
           , "><div class=\"staticpedia-section-body\">"
           , render ctx (body section)
           ]
-          ++ map (render (Component.enterCtxLevel ctx)) (children section)
+          ++ map (render (Component.enterSection ctx)) (children section)
           ++ ["</div></div>"]
         )
         

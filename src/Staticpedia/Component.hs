@@ -1,8 +1,10 @@
 module Staticpedia.Component 
   ( Context
   , ctxLevel
+  , ctxPath
   , initialCtx
-  , enterCtxLevel
+  , enterSection
+  , enterDir
   , Component(..)
   ) where
 
@@ -14,15 +16,19 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Staticpedia.Location as TextNode
 
-newtype Context = Context
+data Context = Context
   { ctxLevel :: Int
+  , ctxPath :: Location.Path
   } deriving (Eq, Ord)
 
-initialCtx:: Context
-initialCtx= Context { ctxLevel = 0 }
+initialCtx :: Context
+initialCtx = Context { ctxLevel = 0, ctxPath = Location.rootPath }
 
-enterCtxLevel :: Context -> Context
-enterCtxLevel ctx = ctx { ctxLevel = ctxLevel ctx + 1 }
+enterSection :: Context -> Context
+enterSection ctx = ctx { ctxLevel = ctxLevel ctx + 1 }
+
+enterDir :: Location.Fragment  -> Context -> Context
+enterDir frag ctx = ctx { ctxPath = Location.appendToPath frag (ctxPath ctx) }
 
 class Component c where
   render :: Context -> c -> Text
@@ -37,7 +43,11 @@ instance Component Location.Fragment where
   render _ = TextNode.toHtml . TextNode.fromText . Location.fragmentText
 
 instance Component Location.Path where
-  render ctx = Text.intercalate "/" . map (render ctx) . Location.pathFragments
+  render ctx p =
+    let (_, ctxTail, currTail) = Location.branchPath (ctxPath ctx) p
+        dots = (map (const "..") . Location.pathFragments) ctxTail
+        navigation = (map (render ctx) . Location.pathFragments) currTail
+    in Text.intercalate "/" ("." : dots ++ navigation)
 
 instance Component Location.Internal where
   render ctx (Location.PathOnly p) = render ctx p

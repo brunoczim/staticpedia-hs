@@ -53,7 +53,8 @@ instance Component Page where
               , render ctx (title page)
               , "</h1><div id=\"staticpedia-body-wrapper\">"
               ]
-          ++ map (render (Component.enterCtxLevel ctx)) (sections page)
+          ++ render ctx (body page)
+          : map (render (Component.enterSection ctx)) (sections page)
           ++ ["</div></div></body></html>"]
         )
     
