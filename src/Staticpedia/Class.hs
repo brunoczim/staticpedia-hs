@@ -26,7 +26,7 @@ data CreationError = CreationError
 
 instance TextShow CreationError where
   showb e = (B.fromText . Text.concat)
-    [ "Invalid class "
+    [ "invalid class "
     , creationErrorText e
     , " because "
     , (showt . creationErrorKind) e

@@ -3,6 +3,7 @@ module Staticpedia.Error
   , raise
   , mapErr
   , erase
+  , unwrap
   ) where
 
 import Data.Text (Text)

@@ -11,6 +11,7 @@ import Staticpedia.TextNode (TextNode)
 import qualified Staticpedia.TextNode as TextNode
 import Staticpedia.Component (Component, render)
 import Staticpedia.Location (Location)
+import qualified Staticpedia.Location as Location
 
 data InlineComponent
   = Text TextNode
@@ -21,7 +22,8 @@ data InlineComponent
   | Link Location InlineComponent
   | Audio Location
   | CustomClass [Class] InlineComponent
-  | CustomElement Text InlineComponent Text
+  | CustomId [Class] Location.Id InlineComponent
+  | RawElement Text InlineComponent Text
   | RawHtml Text
   deriving (Eq, Ord)
 
@@ -53,6 +55,15 @@ instance Component InlineComponent where
     , render ctx c
     , "</span>"
     ]
-  render ctx (CustomElement start c end) = Text.concat
+  render ctx (CustomId clss id c) = Text.concat
+    [ "<span id=\""
+    , render ctx id
+    , " \" class=\""
+    ,  (Text.intercalate " " . fmap showt) clss
+    , "\">"
+    , render ctx c
+    , "</span>"
+    ]
+  render ctx (RawElement start c end) = Text.concat
     [ start, render ctx c, end ]
   render _ (RawHtml t) = t

@@ -10,6 +10,10 @@ module Staticpedia.Location
   , Location (..)
   , fromPath
   , fromId
+  , fragmentFromText
+  , idFromText
+  , pathFromText
+  , internalFromText
   ) where
 
 import qualified Data.Char as Char
@@ -29,9 +33,9 @@ data IdError = IdError
 
 instance TextShow IdError where
   showb e = (B.fromText . Text.concat)
-    [ "Invalid id "
+    [ "invalid id "
     , idErrorText e
-    , " because "
+    , ", because of "
     , (showt . idErrorKind) e
     ]
 
@@ -67,9 +71,9 @@ data FragmentError = FragmentError
 
 instance TextShow FragmentError where
   showb e = (B.fromText . Text.concat)
-    [ "Invalid fragment "
+    [ "invalid fragment "
     , fragmentErrorText e
-    , " because "
+    , ", because of "
     , (showt . fragmentErrorKind) e
     ]
 
@@ -104,9 +108,9 @@ data PathError = PathError
 
 instance TextShow PathError where
   showb e = (B.fromText . Text.concat)
-    [ "Invalid path "
+    [ "invalid path "
     , pathErrorText e
-    , ": "
+    , ", because of "
     , (showt . pathErrorCause) e
     ]
 
@@ -147,9 +151,9 @@ data InternalLocError = InternalLocError
 
 instance TextShow InternalLocError where
   showb e = (B.fromText . Text.concat)
-    [ "Invalid internalLoc "
+    [ "invalid internalLoc "
     , internalLocErrorText e
-    , " because "
+    , ", because of "
     , (showt . internalLocErrorCause) e
     ]
 
@@ -164,7 +168,7 @@ instance TextShow InternalLocErrorCause where
 
 internalFromText :: Text -> Either InternalLocError Internal
 internalFromText t =
-  let (pathT, idT) = case Text.findIndex (== '/') t of
+  let (pathT, idT) = case Text.findIndex (== '#') t of
         Just i -> (Text.take i t, Text.drop (i + 1) t)
         Nothing -> (t, "")
       pathResult = mapErr (InternalLocError t . InternalLocErrorPath)

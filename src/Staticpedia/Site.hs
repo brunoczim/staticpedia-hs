@@ -1,8 +1,11 @@
 module Staticpedia.Site
   ( Directory
+  , Node (..)
+  , Site (..)
+  , GenConfig (..)
   , dirToMap
   , dirFromMap
-  , Node (..)
+  , emptyDir
   , insertNode
   , insertPage
   , insertDir
@@ -21,7 +24,7 @@ import Data.Foldable (foldl')
 import Data.Text.IO (writeFile)
 import System.Directory
   ( createDirectoryIfMissing
-  , removeDirectoryRecursive
+  , removePathForcibly
   , getDirectoryContents
   , doesDirectoryExist
   , copyFileWithMetadata
@@ -113,27 +116,31 @@ insertDir path d0 d1 = withDir (mergeDirs d1) path d0
 newtype Site = Site { root :: Directory }
 
 data GenConfig = GenConfig
-  { outputSysDir :: FilePath 
-  , assetsSysDir :: FilePath
+  { assetsSysDir :: FilePath
+  , outputSysDir :: FilePath 
   } deriving (Eq, Ord)
 
 copyDirRecursive :: FilePath  -> FilePath  -> IO ()
 copyDirRecursive src dest = do
   entries <- getDirectoryContents src
-  forM_ entries $ \path -> do
-    isDir <- doesDirectoryExist path
-    if isDir
-      then do
-        createDirectoryIfMissing True (dest ++ path)
-        copyDirRecursive (src ++ "/" ++ path) (dest ++ "/" ++ path)
-      else copyFileWithMetadata (src ++ "/" ++ path) (dest ++ "/" ++ path)
+  forM_ entries $ \path -> if path == "." || path == ".."
+    then return ()
+    else do
+      let fullSrcPath = src ++ "/" ++ path
+          fullDestPath = dest ++ "/" ++ path
+      isDir <- doesDirectoryExist fullSrcPath
+      if isDir
+        then do
+          createDirectoryIfMissing True fullDestPath
+          copyDirRecursive fullSrcPath fullDestPath
+        else copyFileWithMetadata fullSrcPath fullDestPath
 
 
 generate :: GenConfig -> Site -> IO ()
 generate cfg site = do
   when (outputSysDir cfg /= assetsSysDir cfg)
     ( do
-      removeDirectoryRecursive (outputSysDir cfg)
+      removePathForcibly (outputSysDir cfg)
       createDirectoryIfMissing True (outputSysDir cfg)
       copyDirRecursive (assetsSysDir cfg) (outputSysDir cfg)
     )
@@ -144,7 +151,7 @@ generateDir :: FilePath -> Directory -> IO ()
 generateDir path dir = do
   createDirectoryIfMissing True path
   forM_ (Map.toAscList (dirToMap dir)) $ \(frag, node) ->
-    generateNode (path ++ "/" ++ show (Location.fragmentText frag)) node
+    generateNode (path ++ "/" ++ Text.unpack (Location.fragmentText frag)) node
 
 generatePage :: FilePath -> Page -> IO ()
 generatePage path = writeFile path . render Component.initialCtx

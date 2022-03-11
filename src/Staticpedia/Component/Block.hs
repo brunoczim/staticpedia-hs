@@ -7,6 +7,7 @@ module Staticpedia.Component.Block
 import Staticpedia.Component (Component, render)
 import Staticpedia.Component.Inline (InlineComponent)
 import Staticpedia.Location (Location)
+import qualified Staticpedia.Location as Location
 import Staticpedia.TextNode (TextNode)
 import Staticpedia.Class (Class)
 import qualified Staticpedia.Error as Error
@@ -26,7 +27,8 @@ data BlockComponent
   | Table [[TableEntry]]
   | TableFigure InlineComponent [[TableEntry]]
   | CustomClass [Class] BlockComponent
-  | CustomElement Text BlockComponent Text
+  | CustomId [Class] Location.Id BlockComponent
+  | RawElement Text BlockComponent Text
   | RawHtml Text
   deriving (Eq, Ord)
 
@@ -115,7 +117,16 @@ instance Component BlockComponent where
     , render ctx c
     , "</div>"
     ]
-  render ctx (CustomElement start c end) = Text.concat
+  render ctx (CustomId clss id c) = Text.concat
+    [ "<div id=\""
+    , render ctx id
+    ,"\" class=\""
+    ,  (Text.intercalate " " . fmap showt) clss
+    , "\">"
+    , render ctx c
+    , "</div>"
+    ]
+  render ctx (RawElement start c end) = Text.concat
     [ start, render ctx c, end ]
   render _ (RawHtml t) = t
 
