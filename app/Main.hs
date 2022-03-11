@@ -6,7 +6,7 @@ import qualified Staticpedia.Location as Location
 import qualified Staticpedia.Error as Error
 import Staticpedia.Component.Page (Page (Page))
 import qualified Staticpedia.Component.Page as Page
-import Staticpedia.Component.Inline (InlineComponent (Text))
+import Staticpedia.Component.Inline (InlineComponent (Text, Link))
 import Staticpedia.Component.Block ( BlockComponent (Paragraph, Inline))
 
 config :: Site.GenConfig
@@ -24,14 +24,18 @@ pagesHead = Page.Head
         ) "css/main.css"
       ]
   , Page.scripts = []
-  , Page.banner = Inline (Text "Example Encyclopedia")
+  , Page.banner = Inline
+      ( Link
+          (Location.fromPath (Location.Path []))
+          (Text "Example Encyclopedia")
+      )
   }
 
 site :: Site
 site =
   let index = Page
         { Page.head = pagesHead
-        , Page.title = "Example Encyclopedia"
+        , Page.title = "Welcome To The Example Encyclopedia"
         , Page.body = Paragraph (Text "Hello, World!")
         , Page.sections = []
         }

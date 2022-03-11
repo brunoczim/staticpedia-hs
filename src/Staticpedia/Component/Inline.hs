@@ -41,7 +41,7 @@ instance Component InlineComponent where
     , render ctx l
     , "\">"
     , render ctx c
-    , "<a>"
+    , "</a>"
     ]
   render ctx (Audio l) = Text.concat
     [ "<audio controls src=\""

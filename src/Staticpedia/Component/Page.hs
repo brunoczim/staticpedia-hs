@@ -37,7 +37,7 @@ instance Component Page where
           , "\">"
           ]
     in Text.concat
-        ( ["<!DOCTYPE html><html lang=\"en\"><meta charset=\"utf-8\">"
+        ( ["<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">"
           , "<meta name=\"viewport\" "
           , "content=\"width=devicewidth,initial-scale=1.0\">"
           , "<title>"
