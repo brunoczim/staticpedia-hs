@@ -16,6 +16,10 @@ html, body, #page-wrapper {
     height: auto;
 }
 
+body {
+    padding: 10px;
+}
+
 b.staticpedia-bold, b.staticpedia-bold * {
     font-weight: bold;
 }
@@ -170,7 +174,7 @@ ul.static-unmarked-list > li {
     line-height: 1.25;
 }
 
-#staticpedia-banner > a {
+#staticpedia-banner a {
     font-size: 120%;
     font-weight: bold;
     border: solid black 1px;
