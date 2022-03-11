@@ -84,7 +84,7 @@ withDir f p d = case Location.pathFragments p of
           Just (PageNode _) -> Left (PageAlreadyExists x)
           Nothing -> Right emptyDir
     d'' <- withDir f (Location.Path xs) d'
-    return (dirAsMap (Map.insert x (DirNode d')) d)
+    return (dirAsMap (Map.insert x (DirNode d'')) d)
 
 insertNode :: Fragment
   -> Node
@@ -150,7 +150,7 @@ generate cfg site = do
 generateDir :: FilePath -> Directory -> IO ()
 generateDir path dir = do
   createDirectoryIfMissing True path
-  forM_ (Map.toAscList (dirToMap dir)) $ \(frag, node) ->
+  forM_ (Map.toAscList (dirToMap dir)) $ \(frag, node) -> do
     generateNode (path ++ "/" ++ Text.unpack (Location.fragmentText frag)) node
 
 generatePage :: FilePath -> Page -> IO ()

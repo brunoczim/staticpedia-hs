@@ -35,30 +35,80 @@ pagesHead = Page.Head
       )
   }
 
+pageTwoDir :: Location.Path
+pageTwoDir = Error.unwrap (Location.pathFromText "second-page")
+
+pageBDir :: Location.Path
+pageBDir = Error.unwrap (Location.pathFromText "page-b")
+
+pageTwo :: Page
+pageTwo = Page
+  { Page.head = pagesHead
+  , Page.title = "Second Page of The Example Encyclopedia"
+  , Page.body = Paragraph (Sequence
+      [ Text "The second page is just the second page of the encyclopedia."
+      , Text " That's it."
+      ])
+  , Page.sections = []
+  }
+
+pageB :: Page
+pageB = Page
+  { Page.head = pagesHead
+  , Page.title = "Page B of The Example Encyclopedia"
+  , Page.body = Paragraph (Sequence
+      [ Text "This is just the B page of the encyclopedia. There is no A."
+      ])
+  , Page.sections = []
+  }
+
+indexPage :: Page
+indexPage = Page
+  { Page.head = pagesHead
+  , Page.title = "Welcome To The Example Encyclopedia"
+  , Page.body = Paragraph (Sequence
+      [ Text "Hello, World! This is an example of an encyclopedia made"
+      , Text " with staticpedia."
+      ])
+  , Page.sections =
+      [ Section
+          { Section.title = Text "Relevant Pages"
+          , Section.id = Error.unwrap (Location.idFromText "relevant")
+          , Section.body = UnorderedList
+              [ Inline
+                  (Link
+                    (Location.fromPath pageTwoDir)
+                    (Text "Second Example Page")
+                  )
+              , Inline
+                  (Link
+                    (Location.fromPath pageBDir)
+                    (Text "Example Page B")
+                  )
+              ]
+          , Section.children = []
+          }
+      ]
+  }
+
 site :: Site
 site =
-  let index = Page
-        { Page.head = pagesHead
-        , Page.title = "Welcome To The Example Encyclopedia"
-        , Page.body = Paragraph (Sequence
-            [ Text "Hello, World! This is an example of an encyclopedia made"
-            , Text " with staticpedia."
-            ])
-        , Page.sections =
-            [ Section
-                { Section.title = Text "Relevant Pages"
-                , Section.id = Error.unwrap (Location.idFromText "relevant")
-                , Section.body = UnorderedList []
-                , Section.children = []
-                }
-            ]
-        }
-      root =
+  let root =
         ( Error.unwrap
           . Site.insertPage
-            (Error.unwrap (Location.pathFromText ""))
+            pageBDir
             (Error.unwrap (Location.fragmentFromText "index.html"))
-            index
+            pageB
+          . Error.unwrap
+          . Site.insertPage
+            pageTwoDir
+            (Error.unwrap (Location.fragmentFromText "index.html"))
+            pageTwo
+          . Error.unwrap
+          . Site.insertPage
+            Location.rootPath
+            (Error.unwrap (Location.fragmentFromText "index.html"))
+            indexPage
         ) Site.emptyDir
   in Site root
 

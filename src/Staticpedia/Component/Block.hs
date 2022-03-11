@@ -68,7 +68,7 @@ instance Component BlockComponent where
     , "</div></div>"
     ]
   render ctx (OrderedList cs) = Text.concat
-    ( "<ol class=\"staticpedia-list staticpedia-ordered-list>"
+    ( "<ol class=\"staticpedia-list staticpedia-ordered-list\">"
       : (cs >>= (\c ->
         [ "<li>"
         , case c of
@@ -78,7 +78,7 @@ instance Component BlockComponent where
       ++ ["</ol>"]
     )
   render ctx (UnorderedList cs) = Text.concat
-    ( "<ul class=\"staticpedia-list staticpedia-unordered-list>"
+    ( "<ul class=\"staticpedia-list staticpedia-unordered-list\">"
       : (cs >>= (\c ->
         [ "<li>"
         , case c of
@@ -88,7 +88,7 @@ instance Component BlockComponent where
       ++ ["</ul>"]
     )
   render ctx (UnmarkedList cs) = Text.concat
-    ( "<ul class=\"staticpedia-list staticpedia-marked-list>"
+    ( "<ul class=\"staticpedia-list staticpedia-marked-list\">"
       : (cs >>= (\c ->
         [ "<li>"
         , case c of
