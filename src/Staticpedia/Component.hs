@@ -2,9 +2,8 @@ module Staticpedia.Component
   ( Context
   , ctxLevel
   , ctxPath
-  , initialCtx
+  , createCtx 
   , enterSection
-  , enterDir
   , Component(..)
   ) where
 
@@ -21,14 +20,11 @@ data Context = Context
   , ctxPath :: Location.Path
   } deriving (Eq, Ord)
 
-initialCtx :: Context
-initialCtx = Context { ctxLevel = 0, ctxPath = Location.rootPath }
+createCtx :: Location.Path -> Context
+createCtx path = Context { ctxLevel = 0, ctxPath = path }
 
 enterSection :: Context -> Context
 enterSection ctx = ctx { ctxLevel = ctxLevel ctx + 1 }
-
-enterDir :: Location.Fragment  -> Context -> Context
-enterDir frag ctx = ctx { ctxPath = Location.appendToPath frag (ctxPath ctx) }
 
 class Component c where
   render :: Context -> c -> Text
@@ -45,7 +41,7 @@ instance Component Location.Fragment where
 instance Component Location.Path where
   render ctx p =
     let (_, ctxTail, currTail) = Location.branchPath (ctxPath ctx) p
-        dots = (map (const "..") . Location.pathFragments) ctxTail
+        dots = (drop 1 . map (const "..") . Location.pathFragments) ctxTail
         navigation = (map (render ctx) . Location.pathFragments) currTail
     in Text.intercalate "/" ("." : dots ++ navigation)
 

@@ -123,17 +123,17 @@ data GenConfig = GenConfig
 copyDirRecursive :: FilePath  -> FilePath  -> IO ()
 copyDirRecursive src dest = do
   entries <- getDirectoryContents src
-  forM_ entries $ \path -> if path == "." || path == ".."
-    then return ()
-    else do
-      let fullSrcPath = src ++ "/" ++ path
-          fullDestPath = dest ++ "/" ++ path
-      isDir <- doesDirectoryExist fullSrcPath
-      if isDir
-        then do
-          createDirectoryIfMissing True fullDestPath
-          copyDirRecursive fullSrcPath fullDestPath
-        else copyFileWithMetadata fullSrcPath fullDestPath
+  forM_ entries $ \path -> when (path /= "." && path /= "..")
+    ( do
+        let fullSrcPath = src ++ "/" ++ path
+            fullDestPath = dest ++ "/" ++ path
+        isDir <- doesDirectoryExist fullSrcPath
+        if isDir
+          then do
+            createDirectoryIfMissing True fullDestPath
+            copyDirRecursive fullSrcPath fullDestPath
+          else copyFileWithMetadata fullSrcPath fullDestPath
+    )
 
 
 generate :: GenConfig -> Site -> IO ()
@@ -144,18 +144,20 @@ generate cfg site = do
       createDirectoryIfMissing True (outputSysDir cfg)
       copyDirRecursive (assetsSysDir cfg) (outputSysDir cfg)
     )
-  generateDir (outputSysDir cfg) (root site)
+  generateDir (outputSysDir cfg) Location.rootPath (root site)
 
 
-generateDir :: FilePath -> Directory -> IO ()
-generateDir path dir = do
-  createDirectoryIfMissing True path
+generateDir :: FilePath -> Location.Path -> Directory -> IO ()
+generateDir osPath path dir = do
+  createDirectoryIfMissing True osPath
   forM_ (Map.toAscList (dirToMap dir)) $ \(frag, node) -> do
-    generateNode (path ++ "/" ++ Text.unpack (Location.fragmentText frag)) node
+    let osPath' = osPath ++ "/" ++ Text.unpack (Location.fragmentText frag)
+        path' = Location.appendToPath frag path
+    generateNode osPath' path' node
 
-generatePage :: FilePath -> Page -> IO ()
-generatePage path = writeFile path . render Component.initialCtx
+generatePage :: FilePath -> Location.Path -> Page -> IO ()
+generatePage osPath path = writeFile osPath . render (Component.createCtx path)
 
-generateNode :: FilePath -> Node -> IO ()
-generateNode path (PageNode page) = generatePage path page
-generateNode path (DirNode dir) = generateDir path dir
+generateNode :: FilePath -> Location.Path -> Node -> IO ()
+generateNode osPath path (PageNode page) = generatePage osPath path page
+generateNode osPath path (DirNode dir) = generateDir osPath path dir
