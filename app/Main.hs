@@ -31,7 +31,7 @@ pagesHead = Page.Head
   , Page.banner = Inline
       ( Link
           (Location.fromPath (Location.Path []))
-          (Text "Example Encyclopedia")
+          "Example Encyclopedia"
       )
   }
 
@@ -46,8 +46,8 @@ pageTwo = Page
   { Page.head = pagesHead
   , Page.title = "Second Page of The Example Encyclopedia"
   , Page.body = Paragraph (Sequence
-      [ Text "The second page is just the second page of the encyclopedia."
-      , Text " That's it."
+      [ "The second page is just the second page of the encyclopedia."
+      , " That's it."
       ])
   , Page.sections = []
   }
@@ -57,7 +57,7 @@ pageB = Page
   { Page.head = pagesHead
   , Page.title = "Page B of The Example Encyclopedia"
   , Page.body = Paragraph (Sequence
-      [ Text "This is just the B page of the encyclopedia. There is no A."
+      [ "This is just the B page of the encyclopedia. There is no A."
       ])
   , Page.sections = []
   }
@@ -67,24 +67,17 @@ indexPage = Page
   { Page.head = pagesHead
   , Page.title = "Welcome To The Example Encyclopedia"
   , Page.body = Paragraph (Sequence
-      [ Text "Hello, World! This is an example of an encyclopedia made"
-      , Text " with staticpedia."
+      [ "Hello, World! This is an example of an encyclopedia made with"
+      , " staticpedia."
       ])
   , Page.sections =
       [ Section
-          { Section.title = Text "Relevant Pages"
+          { Section.title = "Relevant Pages"
           , Section.id = Error.unwrap (Location.idFromText "relevant")
           , Section.body = UnorderedList
               [ Inline
-                  (Link
-                    (Location.fromPath pageTwoDir)
-                    (Text "Second Example Page")
-                  )
-              , Inline
-                  (Link
-                    (Location.fromPath pageBDir)
-                    (Text "Example Page B")
-                  )
+                  (Link (Location.fromPath pageTwoDir) "Second Example Page")
+              , Inline (Link (Location.fromPath pageBDir) "Example Page B")
               ]
           , Section.children = []
           }

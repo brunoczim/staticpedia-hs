@@ -4,6 +4,7 @@ module Staticpedia.Component.Inline
   where
 
 import Data.Text (Text)
+import Data.String (IsString, fromString)
 import qualified Data.Text as Text
 import Staticpedia.Class (Class)
 import TextShow (showt)
@@ -26,6 +27,9 @@ data InlineComponent
   | RawElement Text InlineComponent Text
   | RawHtml Text
   deriving (Eq, Ord)
+
+instance IsString InlineComponent where
+  fromString = Text . fromString
 
 instance Component InlineComponent where
   render ctx (Text t) = render ctx t
