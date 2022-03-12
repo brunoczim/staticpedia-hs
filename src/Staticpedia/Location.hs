@@ -33,6 +33,9 @@ newtype Id = Id { idText :: Text } deriving (Eq, Ord)
 instance TextShow Id where
   showb = B.fromText . idText
 
+instance Show Id where
+  show = Text.unpack . showt
+
 data IdError = IdError
   { idErrorText :: Text
   , idErrorKind :: IdErrorKind
@@ -46,6 +49,9 @@ instance TextShow IdError where
     , (showt . idErrorKind) e
     ]
 
+instance Show IdError where
+  show = Text.unpack . showt
+
 data IdErrorKind
   = EmptyId
   | BadIdStart Char
@@ -58,6 +64,9 @@ instance TextShow IdErrorKind where
     ["character ", Text.singleton ch, " is not valid for an ID start"]
   showb (InvalidIdChar ch) = (B.fromText . Text.concat)
     ["character ", Text.singleton ch, " is not valid part of an ID"]
+
+instance Show IdErrorKind where
+  show = Text.unpack . showt
 
 idFromText :: Text -> Either IdError Id
 idFromText t = case Text.uncons t of
@@ -74,6 +83,9 @@ newtype Fragment = Fragment { fragmentText :: Text } deriving (Eq, Ord)
 instance TextShow Fragment where
   showb = B.fromText . fragmentText
 
+instance Show Fragment where
+  show = Text.unpack . showt
+
 data FragmentError = FragmentError
   { fragmentErrorText :: Text
   , fragmentErrorKind :: FragmentErrorKind
@@ -86,6 +98,9 @@ instance TextShow FragmentError where
     , ", because of "
     , (showt . fragmentErrorKind) e
     ]
+
+instance Show FragmentError where
+  show = Text.unpack . showt
 
 data FragmentErrorKind
   = EmptyFragment
@@ -100,6 +115,9 @@ instance TextShow FragmentErrorKind where
   showb InvalidDoubleDot = B.fromText "'..' not allowed as whole fragment"
   showb (InvalidFragmentChar ch) = (B.fromText . Text.concat)
     ["character ", Text.singleton ch, " is not valid part of an ID"]
+
+instance Show FragmentErrorKind where
+  show = Text.unpack . showt
 
 fragmentFromText :: Text -> Either FragmentError Fragment
 fragmentFromText "" = Left (FragmentError "" EmptyFragment)
@@ -128,6 +146,9 @@ branchPath px py = (Path [], px, py)
 instance TextShow Path where
   showb = B.fromText . Text.intercalate "/" . map showt . pathFragments
 
+instance Show Path where
+  show = Text.unpack . showt
+
 data PathError = PathError
   { pathErrorText :: Text
   , pathErrorCause :: FragmentError
@@ -140,6 +161,9 @@ instance TextShow PathError where
     , ", because of "
     , (showt . pathErrorCause) e
     ]
+
+instance Show PathError where
+  show = Text.unpack . showt
 
 pathFromText :: Text -> Either PathError Path
 pathFromText t =
@@ -168,6 +192,9 @@ instance TextShow Internal where
     )
   showb (IdOnly i) = B.fromText (Text.concat ["#", showt i])
 
+instance Show Internal where
+  show = Text.unpack . showt
+
 internalPath :: Internal -> Maybe Path
 internalPath (PathOnly p) = Just p
 internalPath (IdOnly _) = Nothing
@@ -191,6 +218,9 @@ instance TextShow InternalLocError where
     , (showt . internalLocErrorCause) e
     ]
 
+instance Show InternalLocError where
+  show = Text.unpack . showt
+
 data InternalLocErrorCause
   = InternalLocErrorPath PathError
   | InternalLocErrorId IdError
@@ -199,6 +229,9 @@ data InternalLocErrorCause
 instance TextShow InternalLocErrorCause where
   showb (InternalLocErrorPath e) = showb e
   showb (InternalLocErrorId e) = showb e
+
+instance Show InternalLocErrorCause where
+  show = Text.unpack . showt
 
 internalFromText :: Text -> Either InternalLocError Internal
 internalFromText t =
@@ -231,3 +264,6 @@ fromId = Internal . IdOnly
 instance TextShow Location where
   showb (Internal l) = showb l
   showb (External l) = (showb . TextNode.toHtml) l
+
+instance Show Location where
+  show = Text.unpack . showt
